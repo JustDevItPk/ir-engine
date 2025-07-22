@@ -24,7 +24,7 @@ Infinite Reality Engine. All Rights Reserved.
 */
 
 import { BadRequest } from '@feathersjs/errors/lib'
-import { V1ContainerStatus, V1Pod } from '@kubernetes/client-node'
+import type { V1ContainerStatus, V1Pod } from '@kubernetes/client-node'
 
 import { PodsType, ServerContainerInfoType, ServerPodInfoType } from '@ir-engine/common/src/schemas/cluster/pods.schema'
 import { instancePath, InstanceType } from '@ir-engine/common/src/schemas/networking/instance.schema'

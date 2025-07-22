@@ -23,7 +23,7 @@ All portions of the code written by the Infinite Reality Engine team are Copyrig
 Infinite Reality Engine. All Rights Reserved.
 */
 
-import { AppsV1Api, BatchV1Api, CoreV1Api, CustomObjectsApi } from '@kubernetes/client-node'
+import type { AppsV1Api, BatchV1Api, CoreV1Api, CustomObjectsApi } from '@kubernetes/client-node'
 
 import { defineState } from '@ir-engine/hyperflux'
 

@@ -27,7 +27,6 @@ Infinite Reality Engine. All Rights Reserved.
 
 import { feathers } from '@feathersjs/feathers'
 import { bodyParser, errorHandler, koa, rest } from '@feathersjs/koa'
-import { AppsV1Api, BatchV1Api, CoreV1Api, CustomObjectsApi, KubeConfig } from '@kubernetes/client-node'
 import { EventEmitter } from 'events'
 // Do not delete, this is used even if some IDEs show it as unused
 import swagger from 'feathers-swagger'
@@ -41,7 +40,6 @@ import healthcheck from 'koa-simple-healthcheck'
 import { API } from '@ir-engine/common'
 import commonConfig from '@ir-engine/common/src/config'
 import { pipeLogs } from '@ir-engine/common/src/logger'
-import { pipe } from '@ir-engine/common/src/utils/pipe'
 import { createEngine } from '@ir-engine/ecs/src/Engine'
 import { createHyperStore, getMutableState } from '@ir-engine/hyperflux'
 
@@ -180,16 +178,17 @@ export const configureRedis = () => (app: Application) => {
   return app
 }
 
-export const configureK8s = () => (app: Application) => {
+export const configureK8s = () => async (app: Application) => {
   if (appConfig.kubernetes.enabled) {
-    const kc = new KubeConfig()
+    const k8s = await import('@kubernetes/client-node')
+    const kc = new k8s.KubeConfig()
     kc.loadFromDefault()
     const serverState = getMutableState(ServerState)
 
-    const k8AgonesClient = kc.makeApiClient(CustomObjectsApi)
-    const k8DefaultClient = kc.makeApiClient(CoreV1Api)
-    const k8AppsClient = kc.makeApiClient(AppsV1Api)
-    const k8BatchClient = kc.makeApiClient(BatchV1Api)
+    const k8AgonesClient = kc.makeApiClient(k8s.CustomObjectsApi)
+    const k8DefaultClient = kc.makeApiClient(k8s.CoreV1Api)
+    const k8AppsClient = kc.makeApiClient(k8s.AppsV1Api)
+    const k8BatchClient = kc.makeApiClient(k8s.BatchV1Api)
 
     serverState.merge({
       k8AppsClient,
@@ -212,19 +211,27 @@ export const configureMonitoring = () => (app: Application) => {
   return app
 }
 
-export const serverPipe = pipe(
-  configureOpenAPI(),
-  configureMonitoring(),
-  configurePrimus(),
-  configureRedis(),
-  configureK8s()
-) as (app: Application) => Application
+export const serverPipe = async (app: Application) => {
+  await configureOpenAPI()(app)
+  await configureMonitoring()(app)
+  await configurePrimus()(app)
+  await configureRedis()(app)
+  await configureK8s()(app)
+  return app
+}
 
-export const serverJobPipe = pipe(configurePrimus(), configureK8s()) as (app: Application) => Application
+export const serverJobPipe = async (app: Application) => {
+  await configurePrimus()(app)
+  await configureK8s()(app)
+  return app
+}
 
-export const serverJobRedisPipe = pipe(configurePrimus(), configureRedis(), configureK8s()) as (
-  app: Application
-) => Application
+export const serverJobRedisPipe = async (app: Application) => {
+  await configurePrimus()(app)
+  await configureRedis()(app)
+  await configureK8s()(app)
+  return app
+}
 
 export const createFeathersKoaApp = async (
   serverMode: ServerTypeMode = ServerMode.API,
@@ -267,7 +274,7 @@ export const createFeathersKoaApp = async (
       credentials: true
     })
   )
-  configurationPipe(app)
+  await configurationPipe(app)
   // Feathers authentication-oauth will use http for its redirect_uri if this is 'dev'.
   // Doesn't appear anything else uses it.
   app.set('env', 'production')

@@ -26,7 +26,7 @@ Infinite Reality Engine. All Rights Reserved.
 import { apiJobPath } from '@ir-engine/common/src/schemas/cluster/api-job.schema'
 import { getDateTimeSql } from '@ir-engine/common/src/utils/datetime-sql'
 import { getState } from '@ir-engine/hyperflux'
-import { V1Job } from '@kubernetes/client-node'
+import type { V1Job } from '@kubernetes/client-node'
 import { Application } from '../declarations'
 import { ServerState } from './ServerState'
 import config from './appconfig'
