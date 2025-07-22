@@ -33,7 +33,7 @@ else
 fi
 
 if [ -z "$MYSQL_PASSWORD" ]; then
-  MYSQL_PASSWORD=password
+  MYSQL_PASSWORD=yourpassword
 else
   MYSQL_PASSWORD=$MYSQL_PASSWORD
 fi

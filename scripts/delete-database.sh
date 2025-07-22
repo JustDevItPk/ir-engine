@@ -2,7 +2,7 @@
 
 # MySQL username and password
 DB_USER="server"
-DB_PASSWORD="password"
+DB_PASSWORD="yourpassword"
 
 # Database name to drop
 DB_NAME="ir-engine"
